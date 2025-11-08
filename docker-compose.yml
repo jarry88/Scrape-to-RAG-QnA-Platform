@@ -1,0 +1,59 @@
+# docker-compose.yml
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app
+    env_file:
+      - .env
+    # This now waits for chromadb to be "healthy" before starting
+    depends_on:
+      - chromadb
+      - ollama
+    # considring whether to use healthcheck or service_started
+        
+    # 开发模式下使用 --reload 命令，代码变更时服务自动重启
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 #--reload
+
+  n8n:
+    image: n8nio/n8n
+    ports:
+      - "5678:5678"
+    volumes:
+      - ./data/n8n:/home/node/.n8n
+    environment:
+      # 建议设置为您所在的时区
+      - GENERIC_TIMEZONE=Europe/Berlin
+
+  chromadb:
+    image: chromadb/chroma
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./data/chromadb:/chroma/chroma
+      - ./healthchecks:/healthchecks  # <-- 1. Mount the scripts folder
+   
+
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama # 持久化模型数据
+    # 如果您有 Apple Silicon (M1/M2/M3)，Ollama 会自动利用 GPU。
+    # 如果您有 NVIDIA GPU，请确保已安装 NVIDIA Container Toolkit 并取消下方注释。
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+volumes:
+  ollama_data: # 定义一个 volume 来持久化 Ollama 模型
