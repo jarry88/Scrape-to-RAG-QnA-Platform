@@ -9,6 +9,7 @@ services:
       - "8000:8000"
     volumes:
       - ./backend/app:/app
+      - ./scripts:/scripts 
     env_file:
       - .env
     # This now waits for chromadb to be "healthy" before starting
