@@ -16,3 +16,4 @@ pypdf
 python-multipart
 # ... other dependencies as needed
 playwright  # <--- Add this line
+python-dotenv
