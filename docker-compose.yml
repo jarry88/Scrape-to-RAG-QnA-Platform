@@ -9,6 +9,9 @@ services:
       - "8000:8000"
     volumes:
       - ./backend/app:/app
+      - ./scripts:/scripts 
+      - pip_cache:/root/.cache/pip  # <-- ADD THIS LINE
+
     env_file:
       - .env
     # This now waits for chromadb to be "healthy" before starting
@@ -57,3 +60,4 @@ services:
 
 volumes:
   ollama_data: # 定义一个 volume 来持久化 Ollama 模型
+  pip_cache: # <-- ADD THIS LINE

@@ -15,3 +15,5 @@ pydantic-settings # 现代 FastAPI 项目管理配置的最佳实践
 pypdf 
 python-multipart
 # ... other dependencies as needed
+playwright  # <--- Add this line
+python-dotenv
