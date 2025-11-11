@@ -1,63 +1,84 @@
-# docker-compose.yml
+# docker-compose.yml (Complete and Final Version)
 
 services:
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: backend
     ports:
       - "8000:8000"
     volumes:
       - ./backend/app:/app
-      - ./scripts:/scripts 
-      - pip_cache:/root/.cache/pip  # <-- ADD THIS LINE
-
+      - ./scripts:/scripts
+      - pip_cache:/root/.cache/pip
     env_file:
       - .env
-    # This now waits for chromadb to be "healthy" before starting
+    # This service must wait for its dependencies to start
     depends_on:
       - chromadb
       - ollama
-    # considring whether to use healthcheck or service_started
-        
-    # 开发模式下使用 --reload 命令，代码变更时服务自动重启
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 #--reload
+      - mailpit
+    # Connect this service to our shared application network
+    networks:
+      - app-net
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
 
   n8n:
     image: n8nio/n8n
+    container_name: n8n
     ports:
       - "5678:5678"
     volumes:
       - ./data/n8n:/home/node/.n8n
     environment:
-      # 建议设置为您所在的时区
       - GENERIC_TIMEZONE=Europe/Berlin
+    networks:
+      - app-net
 
   chromadb:
     image: chromadb/chroma
+    container_name: chromadb
+    hostname: chromadb
     ports:
       - "8001:8000"
     volumes:
       - ./data/chromadb:/chroma/chroma
-      - ./healthchecks:/healthchecks  # <-- 1. Mount the scripts folder
-   
+    networks:
+      - app-net
 
   ollama:
     image: ollama/ollama
+    container_name: ollama
+    hostname: ollama
     ports:
       - "11434:11434"
     volumes:
-      - ollama_data:/root/.ollama # 持久化模型数据
-    # 如果您有 Apple Silicon (M1/M2/M3)，Ollama 会自动利用 GPU。
-    # 如果您有 NVIDIA GPU，请确保已安装 NVIDIA Container Toolkit 并取消下方注释。
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: 1
-    #           capabilities: [gpu]
+      - ollama_data:/root/.ollama
+    networks:
+      - app-net
 
+  # ADD THIS NEW SERVICE
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
+    hostname: mailpit
+    ports:
+      - "8025:8025" # Web UI
+      - "1025:1025" # SMTP
+      - "1993:993"   # IMAPS
+    # --- ADD THIS ENVIRONMENT SECTION ---
+    environment:
+      - MP_IP_ADDR=0.0.0.0 # Listen on all network interfaces
+      - MP_IMAP_ADDR=0.0.0.0:993 # Explicitly enable IMAP on all interfaces on
+    networks:
+      - app-net
+# This section defines the single, shared network for all services
+networks:
+  app-net:
+    driver: bridge
+
+# This section defines the named volumes for persistent data
 volumes:
-  ollama_data: # 定义一个 volume 来持久化 Ollama 模型
-  pip_cache: # <-- ADD THIS LINE
+  ollama_data:
+  pip_cache:
