@@ -17,3 +17,5 @@ python-multipart
 # ... other dependencies as needed
 playwright  # <--- Add this line
 python-dotenv
+celery # For background tasks
+redis  # The client for the Redis broker

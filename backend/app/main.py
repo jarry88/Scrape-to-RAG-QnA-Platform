@@ -15,6 +15,8 @@ from settings import settings
 from schemas import IngestResponse, QueryRequest, QueryResponse
 from rag_pipeline import RAGPipeline
 
+from tasks import run_scraper_task # Import our new task
+from pydantic import BaseModel
 # =================================================================================
 # 2. APP INITIALIZATION & STARTUP EVENT
 # =================================================================================
@@ -24,6 +26,25 @@ app = FastAPI(
     version="1.0.0"
 )
 
+class ScrapeRequest(BaseModel):
+    target_url: str
+    content_selector: str
+    output_filename: str
+    login: bool = False
+
+@app.post("/scrape", status_code=202, tags=["Collection"])
+async def start_scraping_job(request: ScrapeRequest):
+    """
+    Accepts a scraping request and starts it as a background job.
+    """
+    # .delay() sends the task to the Celery worker
+    task = run_scraper_task.delay(
+        request.target_url,
+        request.content_selector,
+        request.output_filename,
+        request.login
+    )
+    return {"message": "Scraping job accepted", "task_id": task.id}
 @app.on_event("startup")
 def startup_event():
     print("--- Application Startup Event ---")
