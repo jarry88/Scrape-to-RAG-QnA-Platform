@@ -57,6 +57,34 @@ services:
     #         - driver: nvidia
     #           count: 1
     #           capabilities: [gpu]
+  redis:
+    image: redis:7
+    container_name: redis
+
+  # ADD THIS NEW WORKER SERVICE
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: worker
+    # ADD THIS ENVIRONMENT SECTION
+    working_dir: /app
+
+    command: celery -A tasks.celery_app worker --loglevel=info
+    environment:
+      - PYTHONPATH=/
+        # Let's try adding the root to the path
+   
+    volumes:
+      - ./backend/app:/app
+      - ./scripts:/scripts
+      - pip_cache:/root/.cache/pip
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - chromadb
+      - ollama
 
 volumes:
   ollama_data: # 定义一个 volume 来持久化 Ollama 模型
