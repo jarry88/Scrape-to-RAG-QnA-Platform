@@ -10,6 +10,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Request, Depends
 from langchain_community.document_loaders import PyPDFLoader,TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pathlib import Path
+from fastapi.middleware.cors import CORSMiddleware
 
 # Import from our new, separated modules
 from settings import settings
@@ -24,6 +25,14 @@ from pydantic import BaseModel
 # =================================================================================
 app = FastAPI(title="Scrape-to-RAG QnA Platform API")
 
+origins = ["http://localhost:3000"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class ScrapeRequest(BaseModel):
     target_url: str

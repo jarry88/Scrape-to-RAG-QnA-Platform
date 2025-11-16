@@ -1,0 +1,93 @@
+/* frontend/src/App.css */
+
+body {
+  background-color: #282c34;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.App {
+  text-align: center;
+}
+
+.App-header {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+}
+
+h1 {
+  margin-bottom: 2rem;
+}
+
+form {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+input[type="text"] {
+  padding: 12px 15px;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  border: 2px solid #61dafb;
+  background-color: #20232a;
+  color: white;
+  width: 400px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+  border-color: #ffffff;
+}
+
+button {
+  padding: 12px 25px;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #61dafb;
+  color: #20232a;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #ffffff;
+}
+
+button:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
+
+.answer-section, .error-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #20232a;
+  border-radius: 8px;
+  max-width: 600px;
+  text-align: left;
+  line-height: 1.6;
+}
+
+.error-section {
+  color: #ff6b6b;
+  border: 1px solid #ff6b6b;
+}
+
+.answer-section h2 {
+  margin-top: 0;
+  color: #61dafb;
+}
