@@ -88,7 +88,7 @@ async def main():
     args = parser.parse_args()
     
     # 2. Prepare configuration
-    output_directory = Path("./scraped_data")
+    output_directory = Path("/scraped_data")
     login_config = None
     
     if args.login:

@@ -10,6 +10,7 @@ from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 from settings import settings # Import our settings instance
+import time
 
 class RAGPipeline:
     """A class to hold all the components and logic of the RAG pipeline."""
@@ -52,10 +53,44 @@ class RAGPipeline:
             document_chain = create_stuff_documents_chain(llm, prompt)
             self.retrieval_chain = create_retrieval_chain(retriever, document_chain)
 
-            print("✅ RAG components initialized successfully inside the pipeline object.")
+            print("✅ On-demand initialization successful.")
             return True
-        except Exception:
+        except Exception as e:
             print("--- DETAILED STARTUP ERROR (RAGPipeline) ---")
+            print(f"🚨 On-demand initialization FAILED: {e}")
             traceback.print_exc()
             print("--- END DETAILED STARTUP ERROR ---")
             return False
+    
+    # =========================================================================
+# THE SINGLETON PATTERN: Create and initialize a single, global instance
+# =========================================================================
+def get_rag_pipeline():
+    """
+    This function manages the single, global instance of the RAG pipeline.
+    It runs the resilient initialization loop ONCE and then returns the instance.
+    """
+    global _rag_pipeline_instance
+    # Check if the instance has already been created
+    if _rag_pipeline_instance is None:
+        print("--- Initializing Singleton RAG Pipeline ---")
+        _rag_pipeline_instance = RAGPipeline()
+        
+        # Resilient Initialization Loop
+        MAX_RETRIES = 10
+        RETRY_DELAY = 5
+        for i in range(MAX_RETRIES):
+            if _rag_pipeline_instance.initialize():
+                print("--- Singleton RAG Pipeline is READY ---")
+                break # Success
+            if i < MAX_RETRIES - 1:
+                print(f"Retrying initialization in {RETRY_DELAY} seconds...")
+                time.sleep(RETRY_DELAY)
+        else: # This 'else' belongs to the 'for' loop, it runs if the loop finishes without a 'break'
+            print("🚨 FATAL: Could not initialize RAG pipeline after all retries.")
+            # We will leave the instance created but uninitialized
+    
+    return _rag_pipeline_instance
+
+# Initialize the global variable to None when the module is first loaded
+_rag_pipeline_instance = None
